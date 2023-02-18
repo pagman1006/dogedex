@@ -39,11 +39,6 @@ class DogListActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        adapter.setLongOnItemClickListener { dog ->
-            Log.d("Adapter", "Se dio click largo")
-            dogListViewModel.addDogToUser(dog.id)
-        }
-
         recycler.adapter = adapter
 
         dogListViewModel.dogList.observe(this) { dogList ->

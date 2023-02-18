@@ -37,7 +37,7 @@ class AuthViewModel : ViewModel() {
 
     private fun handleResponseStatus(apiResponseStatus: ApiResponseStatus<User>) {
         if (apiResponseStatus is ApiResponseStatus.Success) {
-            _user.value = apiResponseStatus.data!!
+            _user.value = apiResponseStatus.data
         }
         _status.value = apiResponseStatus
     }
