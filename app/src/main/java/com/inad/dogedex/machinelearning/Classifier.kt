@@ -1,6 +1,7 @@
 package com.inad.dogedex.machinelearning
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.inad.dogedex.MAX_RECOGNITION_DOG_RESULTS
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.TensorProcessor
@@ -125,8 +126,9 @@ class Classifier(tfLiteModel: MappedByteBuffer, private val labels: List<String>
 
             val recognitions = mutableListOf<DogRecognition>()
             val recognitionsSize = min(priorityQueue.size, MAX_RECOGNITION_DOG_RESULTS)
+            Log.d("CLASSIFIER", "getTopKProbability: $recognitionsSize")
             for (i in 0 until recognitionsSize) {
-                recognitions.add(priorityQueue.poll()!!)
+               recognitions.add(priorityQueue.poll()!!)
             }
             return recognitions
         }

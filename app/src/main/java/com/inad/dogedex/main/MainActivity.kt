@@ -31,7 +31,6 @@ import com.inad.dogedex.model.Dog
 import com.inad.dogedex.model.User
 import com.inad.dogedex.settings.SettingsActivity
 import org.tensorflow.lite.support.common.FileUtil
-import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -56,6 +55,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageCapture: ImageCapture
     private lateinit var cameraExecutor: ExecutorService
     private var isCameraReady = false
+
+    private val PRECISION = 70.0
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -100,6 +101,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        viewModel.dogRecognition.observe(this) {
+            enableTakePhotoButton(it)
+        }
+
         requestCameraPermission()
     }
 
@@ -112,7 +117,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        classifier = Classifier(
+        viewModel.setupClassifier(
             FileUtil.loadMappedFile(this@MainActivity, MODEL_PATH),
             FileUtil.loadLabels(this@MainActivity, LABEL_PATH)
         )
@@ -169,12 +174,7 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
             imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                val bitmap = convertImageProxyToBitmap(imageProxy)
-                if (bitmap != null) {
-                    val dogRecognition = classifier.recognizeImage(bitmap).first()
-                    enableTakePhotoButton(dogRecognition)
-                }
-                imageProxy.close()
+                viewModel.recognizeImage(imageProxy)
             }
 
             // Bind use case to camera
@@ -188,34 +188,9 @@ class MainActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    @Suppress("UnsafeOptInUsageError")
-    private fun convertImageProxyToBitmap(imageProxy: ImageProxy): Bitmap? {
-        val image = imageProxy.image ?: return null
-
-        val yBuffer = image.planes[0].buffer // Y
-        val uBuffer = image.planes[1].buffer // U
-        val vBuffer = image.planes[2].buffer // V
-
-        val ySize = yBuffer.remaining()
-        val uSize = uBuffer.remaining()
-        val vSize = vBuffer.remaining()
-
-        val nv21 = ByteArray(ySize + uSize + vSize)
-
-        // U an V are swapped
-        yBuffer.get(nv21, 0, ySize)
-        vBuffer.get(nv21, ySize, vSize)
-        uBuffer.get(nv21, ySize + vSize, uSize)
-
-        val yuvImage = YuvImage(nv21, ImageFormat.NV21, image.width, image.height, null)
-        val out = ByteArrayOutputStream()
-        yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 100, out)
-        val imageBytes = out.toByteArray()
-        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-    }
 
     private fun enableTakePhotoButton(dogRecognition: DogRecognition) {
-        if (dogRecognition.confidence > 70.0) {
+        if (dogRecognition.confidence > PRECISION) {
             binding.takePhotoFab.alpha = 1f
             binding.takePhotoFab.setOnClickListener {
                 viewModel.getDogByMlId(dogRecognition.id)
