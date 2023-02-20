@@ -1,29 +1,31 @@
 package com.inad.dogedex.dogdetail
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inad.dogedex.api.ApiResponseStatus
 import com.inad.dogedex.doglist.DogRepository
 import kotlinx.coroutines.launch
 
-class DogDetailViewModel: ViewModel() {
+class DogDetailViewModel : ViewModel() {
 
     private val dogRepository = DogRepository()
 
-    private val _status = MutableLiveData<ApiResponseStatus<Any>>()
-    val status: LiveData<ApiResponseStatus<Any>>
-        get() = _status
+    var status = mutableStateOf<ApiResponseStatus<Any>?>(null)
+        private set
 
     fun addDogToUser(dogId: Long) {
         viewModelScope.launch {
-            _status.value = ApiResponseStatus.Loading()
+            status.value = ApiResponseStatus.Loading()
             handleAddDogToUserResponseStatus(dogRepository.addDogToUser(dogId))
         }
     }
 
     private fun handleAddDogToUserResponseStatus(apiResponseStatus: ApiResponseStatus<Any>) {
-        _status.value = apiResponseStatus
+        status.value = apiResponseStatus
+    }
+
+    fun resetApiResponseStatus() {
+        status.value = null
     }
 }
