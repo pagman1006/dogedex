@@ -17,7 +17,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
@@ -294,22 +293,4 @@ fun ErrorDialog(status: ApiResponseStatus.Error<Any>, onErrorDialogDismiss: () -
             }
         }
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ErrorDialogPreview() {
-    val error = ApiResponseStatus.Error<Any>(R.string.email_is_not_valid)
-    ErrorDialog(error, onErrorDialogDismiss = {})
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DogDetailScreenPreview() {
-    val dog = Dog(
-        1L, 78, "Pug", "Herding", "70",
-        "75", "", "10 - 12", "Friendly, playful",
-        "5", "6"
-    )
-    DogDetailScreen(dog, onButtonClicked = {}, onErrorDialogDismiss = {})
 }
