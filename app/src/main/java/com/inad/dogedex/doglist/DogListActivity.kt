@@ -19,9 +19,13 @@ class DogListActivity : ComponentActivity() {
         setContent {
             DogedexTheme {
                 val dogList = viewModel.dogList
+                val status = viewModel.status
                 DogListScreen(
                     dogList = dogList.value,
-                    onDogClicked = ::openDogDetailActivity
+                    status = status.value,
+                    onDogClicked = ::openDogDetailActivity,
+                    onNavigationIconClick = ::onNavigationIconClick,
+                    onErrorDialogDismiss = ::resetApiResponseStatus
                 )
             }
         }
@@ -31,6 +35,14 @@ class DogListActivity : ComponentActivity() {
         val intent = Intent(this, DogDetailComposeActivity::class.java)
         intent.putExtra(DOG_KEY, dog)
         startActivity(intent)
+    }
+
+    private fun onNavigationIconClick() {
+        finish()
+    }
+
+    private fun resetApiResponseStatus() {
+        viewModel.resetApiResponseStatus()
     }
 
 }

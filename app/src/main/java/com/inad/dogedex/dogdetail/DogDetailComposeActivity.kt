@@ -1,5 +1,6 @@
 package com.inad.dogedex.dogdetail
 
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -19,9 +20,15 @@ class DogDetailComposeActivity : ComponentActivity() {
 
     private val viewModel: DogDetailViewModel by viewModels()
 
+    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val dog = intent?.extras?.getParcelable<Dog>(DOG_KEY)
+
+        val dog = if (Build.VERSION.SDK_INT >= 33) {
+            intent.getParcelableExtra(DOG_KEY, Dog::class.java)
+        } else {
+            intent?.extras?.getParcelable(DOG_KEY)
+        }
         val isRecognition = intent?.extras?.getBoolean(IS_RECOGNITION_KEY, false) ?: false
 
         if (dog == null) {
