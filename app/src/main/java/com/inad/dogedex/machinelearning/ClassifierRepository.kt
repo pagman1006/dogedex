@@ -5,10 +5,16 @@ import androidx.camera.core.ImageProxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 
-class ClassifierRepository(private val classifier: Classifier) {
+interface IClassifierRepository {
+    suspend fun recognizeImage(imageProxy: ImageProxy): DogRecognition
+}
 
-    suspend fun recognizeImage(imageProxy: ImageProxy): DogRecognition =
+class ClassifierRepository @Inject constructor(private val classifier: Classifier) :
+    IClassifierRepository {
+
+    override suspend fun recognizeImage(imageProxy: ImageProxy): DogRecognition =
         withContext(Dispatchers.IO) {
             val bitmap = convertImageProxyToBitmap(imageProxy)
             if (bitmap == null) {
