@@ -6,9 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.inad.dogedex.R
 import com.inad.dogedex.api.ApiResponseStatus
 import com.inad.dogedex.model.User
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AuthViewModel : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val authRepository: IAuthRepository
+) : ViewModel() {
 
     var user = mutableStateOf<User?>(null)
         private set
@@ -24,8 +29,6 @@ class AuthViewModel : ViewModel() {
 
     var confirmPasswordError = mutableStateOf<Int?>(null)
         private set
-
-    private val authRepository = AuthRepository()
 
     fun login(email: String, password: String) {
         viewModelScope.launch {

@@ -10,7 +10,9 @@ import com.inad.dogedex.R
 import com.inad.dogedex.api.ApiResponseStatus
 import com.inad.dogedex.dogdetail.ui.theme.DogedexTheme
 import com.inad.dogedex.model.Dog
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DogDetailComposeActivity : ComponentActivity() {
 
     companion object {

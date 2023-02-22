@@ -17,8 +17,6 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import com.inad.dogedex.LABEL_PATH
-import com.inad.dogedex.MODEL_PATH
 import com.inad.dogedex.api.ApiResponseStatus
 import com.inad.dogedex.api.ApiServiceInterceptor
 import com.inad.dogedex.auth.LoginActivity
@@ -31,10 +29,11 @@ import com.inad.dogedex.machinelearning.DogRecognition
 import com.inad.dogedex.model.Dog
 import com.inad.dogedex.model.User
 import com.inad.dogedex.settings.SettingsActivity
-import org.tensorflow.lite.support.common.FileUtil
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val requestPermissionLauncher =
@@ -46,7 +45,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(
                     this,
-                    "You need to accept camera permission to use  camera",
+                    "You need to accept camera permission to use camera",
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -112,14 +111,6 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra(DOG_KEY, dog)
         intent.putExtra(IS_RECOGNITION_KEY, true)
         startActivity(intent)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.setupClassifier(
-            FileUtil.loadMappedFile(this@MainActivity, MODEL_PATH),
-            FileUtil.loadLabels(this@MainActivity, LABEL_PATH)
-        )
     }
 
     override fun onDestroy() {

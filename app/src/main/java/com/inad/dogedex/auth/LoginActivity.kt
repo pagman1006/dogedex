@@ -8,7 +8,9 @@ import androidx.activity.viewModels
 import com.inad.dogedex.dogdetail.ui.theme.DogedexTheme
 import com.inad.dogedex.main.MainActivity
 import com.inad.dogedex.model.User
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
 
     private val viewModel: AuthViewModel by viewModels()
