@@ -24,6 +24,7 @@ import com.inad.dogedex.databinding.ActivityMainBinding
 import com.inad.dogedex.dogdetail.DogDetailComposeActivity
 import com.inad.dogedex.dogdetail.DogDetailComposeActivity.Companion.DOG_KEY
 import com.inad.dogedex.dogdetail.DogDetailComposeActivity.Companion.IS_RECOGNITION_KEY
+import com.inad.dogedex.dogdetail.DogDetailComposeActivity.Companion.MOST_PROBABLE_DOGS_IDS
 import com.inad.dogedex.doglist.DogListActivity
 import com.inad.dogedex.machinelearning.DogRecognition
 import com.inad.dogedex.model.Dog
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cameraExecutor: ExecutorService
     private var isCameraReady = false
 
-    private val PRECISION = 70.0
+    private val PRECISION = 67.0
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -109,6 +110,7 @@ class MainActivity : AppCompatActivity() {
     private fun openDogDetailActivity(dog: Dog) {
         val intent = Intent(this, DogDetailComposeActivity::class.java)
         intent.putExtra(DOG_KEY, dog)
+        intent.putExtra(MOST_PROBABLE_DOGS_IDS, ArrayList<String>(viewModel.probableDogIds))
         intent.putExtra(IS_RECOGNITION_KEY, true)
         startActivity(intent)
     }

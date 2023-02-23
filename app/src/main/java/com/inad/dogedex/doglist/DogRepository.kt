@@ -9,6 +9,9 @@ import com.inad.dogedex.api.makeNetworkCall
 import com.inad.dogedex.model.Dog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -16,6 +19,7 @@ interface IDogRepository {
     suspend fun getDogCollection(): ApiResponseStatus<List<Dog>>
     suspend fun addDogToUser(dogId: Long): ApiResponseStatus<Any>
     suspend fun getDogByMlId(mlDogId: String): ApiResponseStatus<Dog>
+    suspend fun getProbableDogs(probableDogsIds: ArrayList<String>): Flow<ApiResponseStatus<Dog>>
 }
 
 
@@ -93,5 +97,14 @@ class DogRepository @Inject constructor(
         val dogMapper = DogDTOMapper()
         dogMapper.fromDogDTOToDogDomain(response.data.dog)
     }
+
+    // Producer of Flow
+    override suspend fun getProbableDogs(probableDogsIds: ArrayList<String>): Flow<ApiResponseStatus<Dog>> =
+        flow {
+            for (mlDogId in probableDogsIds) {
+                val dog = getDogByMlId(mlDogId)
+                emit(dog)
+            }
+        }.flowOn(dispatcher)
 
 }

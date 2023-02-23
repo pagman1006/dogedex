@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.inad.dogedex.R
@@ -30,11 +31,18 @@ import com.inad.dogedex.model.Dog
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun DogDetailScreen(
-    dog: Dog,
-    status: ApiResponseStatus<Any>? = null,
-    onButtonClicked: () -> Unit,
-    onErrorDialogDismiss: () -> Unit
+    finishActivity: () -> Unit,
+    viewModel: DogDetailViewModel = hiltViewModel()
 ) {
+    val status = viewModel.status.value
+    val dog = viewModel.dog.value!!
+    val isRecognition = viewModel.isRecognition.value
+
+    if (status is ApiResponseStatus.Success) {
+        finishActivity()
+    }
+
+    var probableDogsDialogEnabled by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .background(colorResource(id = R.color.secondary_background))
@@ -42,7 +50,10 @@ fun DogDetailScreen(
             .fillMaxSize(),
         contentAlignment = Alignment.TopCenter
     ) {
-        DogInformation(dog)
+        DogInformation(dog = dog, isRecognition = isRecognition) {
+            viewModel.getProbableDogs()
+            probableDogsDialogEnabled = true
+        }
         Image(
             modifier = Modifier
                 .width(270.dp)
@@ -52,20 +63,42 @@ fun DogDetailScreen(
         )
         FloatingActionButton(
             modifier = Modifier.align(alignment = Alignment.BottomCenter),
-            onClick = { onButtonClicked() }) {
+            onClick = {
+                if (isRecognition) {
+                    viewModel.addDogToUser(dogId = dog.id)
+                } else {
+                    finishActivity()
+                }
+            }) {
             Icon(imageVector = Icons.Filled.Check, contentDescription = "")
         }
 
         if (status is ApiResponseStatus.Loading) {
             LoadingWheel()
         } else if (status is ApiResponseStatus.Error) {
-            ErrorDialog(messageId = status.messageId, onErrorDialogDismiss = { onErrorDialogDismiss() })
+            ErrorDialog(
+                messageId = status.messageId,
+                onErrorDialogDismiss = { viewModel.resetApiResponseStatus() })
+        }
+
+        val probableDogList = viewModel.probableDogList.collectAsState().value
+
+        if (probableDogsDialogEnabled) {
+            MostProbableDogsDialog(
+                probableDogList,
+                onShowMostProbableDogsDialogDismiss = { probableDogsDialogEnabled = false },
+                onItemClicked = { viewModel.updateDog(it) }
+            )
         }
     }
 }
 
 @Composable
-fun DogInformation(dog: Dog) {
+fun DogInformation(
+    dog: Dog,
+    isRecognition: Boolean,
+    onProbableDogsButtonClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -118,6 +151,18 @@ fun DogInformation(dog: Dog) {
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Medium
                 )
+
+                if (isRecognition) {
+                    Button(
+                        modifier = Modifier.padding(16.dp),
+                        onClick = { onProbableDogsButtonClick() }) {
+                        Text(
+                            text = stringResource(id = R.string.not_your_dog_button),
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp
+                        )
+                    }
+                }
 
                 Divider(
                     modifier = Modifier.padding(
